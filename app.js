@@ -59,14 +59,18 @@ class Visualiser {
     }
 }
 
+function createVisualisableArray(arr, visualiser) {
+    return new Proxy(arr, createHandler(arr => visualiser.saveImage(arr)))
+}
+
 function bubbleSort(arr) {
     var len = arr.length;
     for (var i = len - 1; i >= 0; i--) {
         for (var j = 1; j <= i; j++) {
             if (arr[j - 1] > arr[j]) {
                 var temp = arr[j - 1];
-                arr[j - 1] =  arr[j];
-                arr[j] =  temp;
+                arr[j - 1] = arr[j];
+                arr[j] = temp;
             }
         }
     }
@@ -85,7 +89,7 @@ function selectionSort(arr) {
         }
 
         temp = arr[i];
-        arr[i] =  arr[minIdx];
+        arr[i] = arr[minIdx];
         arr[minIdx] = temp;
     }
     return arr;
@@ -98,12 +102,14 @@ const visualiser = new Visualiser(canvas);
 const visualiser2 = new Visualiser(canvas2);
 
 const range = (start, stop, step = 1) =>
-    Array(Math.ceil((stop - start) / step)).fill(start).map((x, y) => x + y * step);
+    Array(Math.ceil((stop - start) / step))
+        .fill(start)
+        .map((x, y) => x + y * step);
 
-const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+const shuffle = array => array.sort(() => Math.random() - 0.5);
 
 const createHandler = (callback) => ({
-    set: function(obj, prop, value) {
+    set: function (obj, prop, value) {
         callback(obj, prop, value);
         obj[prop] = value;
     }
@@ -112,12 +118,11 @@ const createHandler = (callback) => ({
 const randomArray1 = shuffle(range(1, 50));
 const randomArray2 = [...randomArray1];
 
-const proxiedArray1 = new Proxy(randomArray1, createHandler(arr => visualiser.saveImage(arr)));
-const proxiedArray2 = new Proxy(randomArray2, createHandler(arr => visualiser2.saveImage(arr)));
+const proxiedArray1 = createVisualisableArray(randomArray1, visualiser);
+const proxiedArray2 = createVisualisableArray(randomArray2, visualiser2);
 
 bubbleSort(proxiedArray1);
 selectionSort(proxiedArray2);
 
 visualiser.draw();
 visualiser2.draw();
-
