@@ -1,10 +1,13 @@
 # Algorithm Visualiser
 
-This is a Project to demonstrate how the new `Proxy` class in Javascript might be used
+This is a Project to demonstrate how the new `Proxy` class in Javascript might be used to visualise the sorting of a array.
+Proxies have the functionality to set a `callback` on when a array/object gets modified and lets
+us access the values. For further information see: 
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy  
 
 ![alt text](./algorithm-visualiser.gif)
 
-## Usage
+## What does it do?
 
 In code you wouldnt need to change the implementation of your particular sort Algorithm as we just
 create a Proxied array that logs every change made to the array.
@@ -43,9 +46,23 @@ function selectionSort(arr) {
     return arr;
 }
 
+// create a 'proxied' array that notices when mutations to the array are done.
 const proxiedArray1 = createVisualisableArray(randomArray1, visualiser);
 const proxiedArray2 = createVisualisableArray(randomArray2, visualiser2);
 
 bubbleSort(proxiedArray1);
 selectionSort(proxiedArray2);
+```
+In `createVisualisableArray` we use a Proxy to log any mutations of the array
+`visualiser.saveImage` creates a image(copy) of the array when it get mutated
+and later uses these 'images' to visualise the sorting
+```js
+function createVisualisableArray(arr, visualiser) {
+    return new Proxy(arr, {
+        set: (obj, key, value) => {
+            visualiser.saveImage(obj);
+            obj[key] = value;
+        }
+    })
+}
 ```

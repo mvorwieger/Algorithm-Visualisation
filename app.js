@@ -4,31 +4,41 @@ class Visualiser {
         this.height = canvasElement.height;
         this.width = canvasElement.width;
         // the images hold all the values of each iteration that the array provides
+        // i.e the image at index 0 has the unmodified array [1,3,2] and the
+        // last image has the fully sorted array [1,2,3] the images inbetween
+        // represent the mutations to the array
         this.images = [];
         this.intervalTime = intervalTime;
         this.barPadding = barPadding;
     }
 
-    saveImage(arr) {
-        this.images.push([...arr]);
+    saveImage(image) {
+        this.images.push([...image]);
     }
 
     draw() {
         let counter = 0;
         let interval = setInterval(() => {
+            // Clear the screen and draw over it afterwards
             this.clear();
+
             const currentImage = this.images[counter];
             const barWidth = this.width / currentImage.length - this.barPadding;
             const highestValue = Math.max(...currentImage);
             const barHeightUnitMultiplicator = this.height / highestValue;
-            const sortedIndex = Visualiser.isSortedTillIndex(currentImage);
+            const sortedIndex = sortedTillIndex(currentImage);
 
             currentImage.forEach((current, index) => {
                 const x = (index * barWidth) + (index * this.barPadding);
                 const y = this.height;
                 const strokeWidth = barWidth;
                 const strokeHeight = current * barHeightUnitMultiplicator;
-                this.drawRect(x, y, strokeWidth, -strokeHeight, sortedIndex > index ? "green" : "black");
+                this.drawRect(
+                    x, 
+                    y, 
+                    strokeWidth, 
+                    -strokeHeight, 
+                    sortedIndex > index ? "green" : "black");
             });
 
             counter++;
@@ -37,16 +47,6 @@ class Visualiser {
                 clearInterval(interval);
             }
         }, this.intervalTime)
-    }
-
-    static isSortedTillIndex(arr) {
-        for (let i = 0; i < arr.length; i++) {
-            if (arr[i] > arr[i + 1]) {
-                return i;
-            }
-        }
-
-        return arr.length;
     }
 
     clear() {
@@ -59,8 +59,14 @@ class Visualiser {
     }
 }
 
-function createVisualisableArray(arr, visualiser) {
-    return new Proxy(arr, createHandler(arr => visualiser.saveImage(arr)))
+function sortedTillIndex(arr) {
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] > arr[i + 1]) {
+            return i;
+        }
+    }
+
+    return arr.length;
 }
 
 function bubbleSort(arr) {
@@ -108,12 +114,14 @@ const range = (start, stop, step = 1) =>
 
 const shuffle = array => array.sort(() => Math.random() - 0.5);
 
-const createHandler = (callback) => ({
-    set: function (obj, prop, value) {
-        callback(obj, prop, value);
-        obj[prop] = value;
-    }
-});
+function createVisualisableArray(arr, visualiser) {
+    return new Proxy(arr, {
+        set: (obj, key, value) => {
+            visualiser.saveImage(obj);
+            obj[key] = value;
+        }
+    })
+}
 
 const randomArray1 = shuffle(range(1, 50));
 const randomArray2 = [...randomArray1];
