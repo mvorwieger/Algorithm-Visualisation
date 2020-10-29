@@ -54,7 +54,7 @@ bubbleSort(proxiedArray1);
 selectionSort(proxiedArray2);
 ```
 In `createVisualisableArray` we use a Proxy to log any mutations of the array
-`visualiser.saveImage` creates a image(copy) of the array when it get mutated
+`visualiser.saveImage` creates a image(copy) of the array when it gets mutated
 and later uses these 'images' to visualise the sorting
 ```js
 function createVisualisableArray(arr, visualiser) {
